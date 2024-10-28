@@ -1,0 +1,178 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pomelo Credit Card Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .event {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .event h3 {
+            margin-top: 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .summary {
+            margin-top: 20px;
+        }
+        .summary pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomelo Credit Card Summary</h1>
+    <form id="summaryForm">
+        <label for="creditLimit">Credit Limit:</label><br>
+        <input type="number" id="creditLimit" name="creditLimit" required><br><br>
+
+        <div id="eventsContainer">
+            <h2>Events</h2>
+            <div class="event">
+                <h3>Event 1</h3>
+                <label for="eventType1">Event Type:</label><br>
+                <select id="eventType1" name="eventType" required>
+                    <option value="TXN_AUTHED">TXN_AUTHED</option>
+                    <option value="TXN_SETTLED">TXN_SETTLED</option>
+                    <option value="TXN_AUTH_CLEARED">TXN_AUTH_CLEARED</option>
+                    <option value="PAYMENT_INITIATED">PAYMENT_INITIATED</option>
+                    <option value="PAYMENT_POSTED">PAYMENT_POSTED</option>
+                    <option value="PAYMENT_CANCELED">PAYMENT_CANCELED</option>
+                </select><br><br>
+
+                <label for="eventTime1">Event Time:</label><br>
+                <input type="number" id="eventTime1" name="eventTime" required><br><br>
+
+                <label for="txnId1">Transaction ID:</label><br>
+                <input type="text" id="txnId1" name="txnId" required><br><br>
+
+                <label for="amount1">Amount (optional):</label><br>
+                <input type="number" id="amount1" name="amount"><br><br>
+            </div>
+        </div>
+
+        <button type="button" onclick="addEvent()">Add Another Event</button><br><br>
+        <button type="submit">Get Summary</button>
+    </form>
+
+    <div class="summary" id="summary">
+        <h2>Summary</h2>
+        <pre id="summaryContent"></pre>
+    </div>
+
+    <script>
+        let eventCount = 1;
+
+        function addEvent() {
+            eventCount++;
+            const eventsContainer = document.getElementById('eventsContainer');
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.innerHTML = `
+                <h3>Event ${eventCount}</h3>
+                <label for="eventType${eventCount}">Event Type:</label><br>
+                <select id="eventType${eventCount}" name="eventType" required>
+                    <option value="TXN_AUTHED">TXN_AUTHED</option>
+                    <option value="TXN_SETTLED">TXN_SETTLED</option>
+                    <option value="TXN_AUTH_CLEARED">TXN_AUTH_CLEARED</option>
+                    <option value="PAYMENT_INITIATED">PAYMENT_INITIATED</option>
+                    <option value="PAYMENT_POSTED">PAYMENT_POSTED</option>
+                    <option value="PAYMENT_CANCELED">PAYMENT_CANCELED</option>
+                </select><br><br>
+
+                <label for="eventTime${eventCount}">Event Time:</label><br>
+                <input type="number" id="eventTime${eventCount}" name="eventTime" required><br><br>
+
+                <label for="txnId${eventCount}">Transaction ID:</label><br>
+                <input type="text" id="txnId${eventCount}" name="txnId" required><br><br>
+
+                <label for="amount${eventCount}">Amount (optional):</label><br>
+                <input type="number" id="amount${eventCount}" name="amount"><br><br>
+            `;
+            eventsContainer.appendChild(eventDiv);
+        }
+
+        document.getElementById('summaryForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const creditLimit = document.getElementById('creditLimit').value;
+            const eventTypes = document.getElementsByName('eventType');
+            const eventTimes = document.getElementsByName('eventTime');
+            const txnIds = document.getElementsByName('txnId');
+            const amounts = document.getElementsByName('amount');
+
+            const events = [];
+            for (let i = 0; i < eventTypes.length; i++) {
+                const evt = {
+                    eventType: eventTypes[i].value,
+                    eventTime: parseInt(eventTimes[i].value),
+                    txnId: txnIds[i].value
+                };
+                if (amounts[i].value !== "") {
+                    evt.amount = parseInt(amounts[i].value);
+                }
+                events.push(evt);
+            }
+
+            const payload = {
+                creditLimit: parseInt(creditLimit),
+                events: events
+            };
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert("Error: " + error.detail);
+                    return;
+                }
+
+                const summary = await response.json();
+                let summaryText = `Available credit: ${summary.available_credit}\nPayable balance: ${summary.payable_balance}\n\nPending transactions:\n`;
+                if (summary.pending_transactions.length > 0) {
+                    summaryText += summary.pending_transactions.join('\n') + '\n';
+                }
+                summaryText += `\nSettled transactions:\n`;
+                if (summary.settled_transactions.length > 0) {
+                    summaryText += summary.settled_transactions.join('\n');
+                }
+
+                document.getElementById('summaryContent').innerText = summaryText;
+            } catch (error) {
+                alert("An error occurred: " + error);
+            }
+        });
+    </script>
+</body>
+</html>

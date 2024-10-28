@@ -1,0 +1,71 @@
+Background
+Pomelo is a fintech company that helps immigrants in the US share money with their loved ones abroad more easily, safely, reliably, and cheaply.
+
+One way we do that is by offering a credit card that lets immigrants share access to their credit, which provides a number of benefits, like better rates, credit building, fraud protection, visibility/transparency, and more.
+
+We wanted to make this problem as real-world as we could, so we modeled it off of real credit card functionality we ourselves had to build!
+
+Since the way credit cards work isn't obvious or trivial, we wrote this doc to teach the basics. We hope you find both this doc and the exercise educational!
+
+Credit card basics
+Credit cards provide access to credit. That means that a financial institution (like Pomelo) is effectively lending you money for purchases, with you promising to pay that money back later.
+
+Credit cards have credit limits. This represents the max amount of money that you'll be able to spend on the card before you have to pay money back.
+
+As you spend on the card, the balance on the card goes up. This is the amount of money that you've spent that you eventually owe back. And when the balance goes up, the available credit goes down.
+
+When you make a payment to pay off or down the balance, the balance (eventually) goes down, and the available credit (eventually) goes up.
+
+Lifecycle of a credit card transaction
+Credit cards have to accommodate all sorts of different use cases, like:
+
+Restaurants want to let you add a tip to your bill after they've already charged your card.
+Hotels want to put a "hold" on your card at the beginning of your stay in case you use the mini bar ("incidentals") or damage your room.
+Banks want to reconcile charges and payments together in bulk each day, for resilience and fault-tolerance.
+To support these and other use cases, credit card transactions go through two high-level stages:
+
+Transactions are first "authorized". An authorization request asks "can I please charge $123 to this credit card?"
+
+Here, the credit card company confirms that the card has enough available credit, and if it does, it saves this transaction as a pending transaction and decreases the available credit.
+
+Later, transactions are eventually "settled". The amount of a transaction can change when it's settled, e.g. if a tip is added.
+
+Here, the credit card company moves the transaction from a pending state to a finalized state and updates the available credit if the transaction amount changed. (Note that available credit can go negative here!)
+
+The credit card company also makes this transaction available to pay off now. (You can't pay off a transaction before it's settled.) In this exercise, we refer to the amount that's available to pay off as the payable balance.
+
+Transaction authorizations can also be cleared. This effectively releases the "hold" on your card. Specifically, the pending transaction is removed altogether, and the available credit is reset.
+
+Settled transactions are final and can no longer be updated or cleared. A merchant can issue a refund or credit by making a new transaction with a negative amount. (Note that available credit can exceed the credit limit if this happens!) In this exercise, we have refund/credit transactions like this go through the same flow as normal transactions above.
+
+Lifecycle of a credit card payment
+Payments against your card balance, e.g. from a linked bank account, go through a similar flow, but with some notable differences:
+
+Payments are first initiated. It may take a few business days to fully process the payment, so the credit card company doesn't free up available credit yet, but it does reduce the payable balance (to prevent you from accidentally paying off the balance multiple times).
+
+In this exercise, we visually group pending payments with pending transactions.
+
+Payments are then "posted". This means the payment has been successfully processed, so the available credit is now freed up, too. (The amount of a payment cannot and does not change when it posts.)
+
+In this exercise, we visually group posted payments with settled transactions.
+
+Similar to authorized transactions, pending payments can also be canceled. This resets the payable balance and removes the pending payment.
+
+Similar to settled transactions, posted payments cannot be canceled or modified.
+
+(Payments can also fail. And in the real world, payments can even be "charged back" after they've posted! We don't worry about either of these things in this exercise right now. Note, though, that if a refund transaction comes in and settles after any balance has already been paid off, the payable balance can go negative!)
+
+Example
+Suppose you have a credit card with a $1,000 credit limit. This means initially, you have $1,000 of available credit and a $0 payable balance.
+
+If you swipe your card for $123, the credit card company (e.g. Pomelo) will get a transaction authorization request. Since you have at least $123 of available credit, the request will be accepted. This will decrease your available credit to $1,000 - $123 = $877. But the transaction hasn't settled yet, so the payable balance will still be $0.
+
+If the auth is cleared, the available credit will go back up to $1,000.
+
+Let's assume the transaction settles instead, with an updated amount of $456. (E.g. you added a very generous $333 tip!) Since the amount changed, the available credit should be updated too; it will now be $1,000 - $456 = $544. And now that the transaction has settled, you can pay it off, too, so your payable balance will now be $456.
+
+Suppose you now initiate a $456 payment to fully pay off your balance. Your payable balance will now go down to $0, but the available credit will remain unchanged at $544.
+
+If you cancel the payment before it posts, your payable balance would go back up to $456.
+
+But if you let the payment go through, it'll eventually post, and your available credit will go back up to $1,000 now, too.
