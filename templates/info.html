@@ -1,0 +1,91 @@
+<!-- templates/info.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pomelo Credit Card Summary - Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        ul, ol {
+            margin-left: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/">Home</a> | 
+            <a href="/info">Info</a>
+        </nav>
+        <h1>Credit Card Summary Web Service Introduction</h1>
+        <p>
+            I loved the online assessment coding up a Credit Card Summary function. It was an interesting experience for me because I love learning about new applications and then making them up from scratch. Thus, this weekend, I developed a simple web service that supports submitting new events and getting updated summaries via a REST API. I have significant experience doing this before in Java using the Spring Framework from my time at Jefferies Investment Banking this summer so I wanted to learn how to do it this time in Python. I used Python’s FastAPI framework to achieve this and deployed it on the public domain using Railway and some minimal front end.
+        </p>
+        
+        <h2>Features and Functionality</h2>
+        <ol>
+            <li>
+                <strong>Event-Based Credit Summary Calculation:</strong>
+                <ul>
+                    <li>Accepts a range of event types (e.g., TXN_AUTHED, TXN_SETTLED).</li>
+                    <li>
+                        <strong>Endpoints:</strong>
+                        <ul>
+                            <li>POST /summarize: Processes incoming transaction events and calculates the credit summary.</li>
+                            <li>GET /: Serves the HTML interface, allowing users to input events and see summaries interactively.</li>
+                        </ul>
+                    </li>
+                    <li>Calculates available credit and payable balance based on event history.</li>
+                    <li>Distinguishes between pending and settled transactions, displaying only recent entries in the settled list.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>RESTful API:</strong>
+                <ul>
+                    <li>Built with FastAPI, it leverages endpoints to receive transaction data and return summaries.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>User Interface:</strong>
+                <ul>
+                    <li>A basic HTML/Javascript interface allows users to manually input event data.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Data Validation with Pydantic:</strong>
+                <ul>
+                    <li>
+                        <strong>Input Models:</strong>
+                        <ul>
+                            <li>Event: Represents a single event with attributes like eventType, eventTime, txnId, and an optional amount.</li>
+                            <li>SummaryRequest: Represents the credit limit and the list of Event objects.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Output Models:</strong>
+                        <ul>
+                            <li>SummaryResponse: Structurally defines the API’s JSON response with fields for available credit, payable balance, pending transactions, and settled transactions.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+        
+        <p>
+            This is a very basic feature that I’ve deployed for now. I plan on adding more things to it as we progress through the interview process. I’m so excited!
+        </p>
+    </div>
+</body>
+</html>

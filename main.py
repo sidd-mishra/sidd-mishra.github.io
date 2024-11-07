@@ -73,3 +73,7 @@ def summarize_credit_card(request: SummaryRequest):
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/info", response_class=HTMLResponse, tags=["info"])
+def get_info(request: Request):
+    return templates.TemplateResponse("info.html", {"request": request})
